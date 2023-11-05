@@ -1,0 +1,42 @@
+name: Node.js CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [16.x,18.x] # Specify the version(s) of Node.js you want to use
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+         path: |
+          /node_modules
+         key: ${{ runner.os }}-${{ hashFiles('/package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm i
+    
+
+      - name: Run tests
+        run: npm test
+
+      # Add more steps here for additional actions, such as building and deploying your application

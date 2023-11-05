@@ -1,0 +1,4 @@
+This folder contains the controller files. Controllers are responsible for handling the incoming 
+requests, processing the data, and returning the appropriate response. They act as the intermediary
+between the routes and the models. Controllers contain functions/methods that correspond to 
+different API endpoints or actions.

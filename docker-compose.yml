@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+  mysql_db:
+    image: mysql
+    # restart: no
+    env_file: ./.env
+    cap_add:
+      - SYS_NICE
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ALLOW_EMPTY_PASSWORD=''
+      - MYSQL_DATABASE=${DB_NAME}
+    ports:
+      - '${MYSQLDB_LOCAL_PORT}:${MYSQLDB_DOCKER_PORT}'
+    command: --init-file /docker-entrypoint-initdb.d/init.sql
+    volumes:
+      - "./server/migrations:/migrations"
+      - "./init.sql:/docker-entrypoint-initdb.d/init.sql"
+ 
+  nginx:
+    depends_on:
+      - api
+      - client
+    # restart: no
+    build:
+      dockerfile: Dockerfile
+      context: ./nginx
+    ports:
+      - "3055:85"
+  phpmyadmin:
+    depends_on:
+      - mysql_db
+    image: phpmyadmin/phpmyadmin
+    container_name: phpadmin_containere_ecommerce
+    environment:
+      PMA_HOST: mysql_db
+    links:
+      - mysql_db:mysql_db
+    ports:
+      - 8082:80
+    # restart: no
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: "./server"
+    depends_on:
+      - mysql_db
+    # restart: no
+    volumes:
+      - ./server:/app
+    command:  sh -c "npm run migrate && npm start"
+    env_file: ./.env
+    ports:
+      - '${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}'
+    environment:
+      - DB_HOST=mysql_db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${MYSQLDB_DOCKER_PORT}
+
+  client:
+    stdin_open: true
+    # restart: no
+    build:
+      dockerfile: Dockerfile
+      context: "./client"
+    ports:
+      - "3005:3005"
+    volumes:
+      - ./client:/app
+ 
