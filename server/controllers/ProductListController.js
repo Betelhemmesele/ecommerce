@@ -34,8 +34,8 @@ exports.productList=async(req, res) =>{
       }
       console.log('Tag Instances:', existingTags);
       console.log('Adding tags to product...');
-      const now = Date.now();
-      await product.addTags(existingTags,{ through: { createdAt: now, updatedAt: now } });
+      // const now = Date.now();
+      await product.addTags(existingTags);
     }
         
         

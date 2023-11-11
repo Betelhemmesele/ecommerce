@@ -20,7 +20,7 @@ export default function Page() {
 
    // redirect authenticated user to profile screen
    useEffect(() => {
-    if (userInfo) {
+    if (userInfo && Object.keys(userInfo).length > 0) {
       router.push( '/products')
     }
     console.log("user info", userInfo)
@@ -97,7 +97,6 @@ export default function Page() {
                   className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
                     {loading ? <span className="loading loading-spinner loading-md"></span> : 'Sign in'}
-                  Sign in
                 </button>
               </div>
             </form>

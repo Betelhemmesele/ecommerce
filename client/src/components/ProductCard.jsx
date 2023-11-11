@@ -1,50 +1,25 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import Price from '@/components/Price'
-
 function ProductCard() {
-  const handle = product.node.handle
-  const title = product.node.title
-  const description = product.node.description
-  const price = product.node.variants.edges[0].node.price
-
-  const imageNode = product.node.images.edges[0].node
 
   return (
-    <Link
-      href={`/products/${handle}`}
-      passHref
-    >
-      <a className="h-120 w-72 rounded shadow-lg mx-auto border border-palette-lighter">
-        <div className="h-72 border-b-2 border-palette-lighter relative">
-          <Image
-            src={imageNode.originalSrc}
-            alt={imageNode.altText}
-            layout="fill"
-            className="transform duration-500 ease-in-out hover:scale-110"
+    <div>
+      <div className="card card-compact w-96 bg-base-100 shadow-xl">
+        <figure>
+          <img
+            src="/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
+            alt="Shoes"
           />
-        </div>
-        <div className="h-48 relative">
-          <div className="font-primary text-palette-primary text-2xl pt-4 px-4 font-semibold">
-            {title}
-          </div>
-          <div className="text-lg text-gray-600 p-4 font-primary font-light">
-            {description}
-          </div>
-          <div
-            className="text-palette-dark font-primary font-medium text-base absolute bottom-0 right-0 mb-4 pl-8 pr-4 pb-1 pt-2 bg-palette-lighter 
-            rounded-tl-sm triangle"
-          >
-            <Price
-              currency="$"
-              num={price}
-              numSize="text-lg"
-            />
+        </figure>
+        <div className="card-body">
+          <h2 className="card-title">Shoes!</h2>
+          <p>If a dog chews shoes whose shoes does he choose?</p>
+          <div className="card-actions justify-end">
+            <button className="btn btn-primary">Edit</button>
+            <button className="btn btn-primary">Delete</button>
           </div>
         </div>
-      </a>
-    </Link>
-  )
+      </div>
+    </div>
+  );
 }
 
-export default ProductCard
+export default ProductCard;

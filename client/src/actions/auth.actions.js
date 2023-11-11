@@ -6,7 +6,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const registerUser = createAsyncThunk(
     'auth/register',
-    async ({ firstName, lastName, contactNumber, email, password }) => {
+    async ({ firstName, lastName, contact_number, location, email, password }) => {
         try {
             const config = {
                 headers: {
@@ -14,10 +14,11 @@ export const registerUser = createAsyncThunk(
                 },
             }
             await axios.post(
-                `${process.env.REACT_APP_BASEURL}/api/user/register`,
-                { firstName, lastName, contactNumber, email, password },
+                `http://localhost:3009/backend/users/register`,
+                { firstName, lastName, contact_number, location, email, password },
                 config
             )
+            console.log('successfully registered')
         } catch (error) {
             // return custom error message from backend if present
             if (error.response && error.response.data.message) {
@@ -40,7 +41,7 @@ export const userLogin = createAsyncThunk(
           },
         }
         const { data } = await axios.post(
-          `${backendURL}/api/user/login`,
+          `http://localhost:3009/backend/users/login`,
           { email, password },
           config
         )

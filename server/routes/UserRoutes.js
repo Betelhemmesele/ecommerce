@@ -25,6 +25,7 @@ router.post("/login", loginUser);
 router.post("/logout", logoutUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset_password/:id/:token", resetPassword);
+
 router.get("/alluser",getAllUsers)
 router.post("/createProducts",productList);
 router.get("/getProducts",getProductList);

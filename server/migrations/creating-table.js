@@ -1,7 +1,8 @@
 'use strict';
 /** @type {import('sequelize-cli').Migration} */
+
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize, DataTypes) {
     await queryInterface.createTable('users', {
       id: {
         allowNull: false,
@@ -75,12 +76,12 @@ module.exports = {
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       }
     });
     await queryInterface.createTable('tags', {
@@ -97,12 +98,12 @@ module.exports = {
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
     });
     
@@ -132,12 +133,12 @@ module.exports = {
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
     });
     await queryInterface.addConstraint('product_tags', {

@@ -13,7 +13,7 @@ const jwt = require("jsonwebtoken");
 
 exports.getAllUsers = async () => {
   try {
-    const users = await User.findAll();
+    const users = await User.User.findAll();
     console.log(users);
   } catch (error) {
     console.error("Error retrieving users:", error);
@@ -23,13 +23,13 @@ exports.getAllUsers = async () => {
 exports.registerUser = async (req, res, next) => {
   const { email } = req.body;
   // Check if the user already exists
-  const existingUser = await User.findOne({ where: { email } });
+  const existingUser = await User.User.findOne({ where: { email } });
   if (existingUser) {
     return res.status(409).json({ error: "User already exists" });
   }
   try {
     const confirmationCode = generateConfirmationCode();
-    const user = await User.create(req.body);
+    const user = await User.User.create(req.body);
     user.confirmationCode = confirmationCode;
     await user.save();
     // Send confirmation email
@@ -58,7 +58,7 @@ exports.registerUser = async (req, res, next) => {
 exports.confirmEmail = async (req, res, next) => {
   const { confirmationCode } = req.body;
   try {
-    const user = await User.findOne({ where: { confirmationCode } });
+    const user = await User.User.findOne({ where: { confirmationCode } });
     if (!user) {
       return next(new Error("Invalid confirmation code/User not found"));
     }
@@ -81,7 +81,7 @@ exports.loginUser = async (req, res, next) => {
 
   try {
     // Find the user based on the email
-    const user = await User.findOne({ where: { email } });
+    const user = await User.User.findOne({ where: { email } });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -116,7 +116,7 @@ exports.logoutUser = async (req, res, next) => {
 };
 exports.forgotPassword = async (req, res, next) => {
   const { email } = req.body;
-  const user = await User.findOne({ where: { email } });
+  const user = await User.User.findOne({ where: { email } });
   if (!user) {
     return res
       .status(400)
@@ -148,7 +148,7 @@ exports.resetPassword = async (req, res, next) => {
       return res.json({ Status: "Error with token" });
     } else {
       try {
-        const result = await User.update(
+        const result = await User.User.update(
           { password: hashedpassword },
           { where: { id: id } }
         );

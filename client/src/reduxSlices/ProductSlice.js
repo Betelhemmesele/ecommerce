@@ -1,7 +1,7 @@
 
 "use client";
 
-import { createProduct, getProductByID, getProductsByUser, updateProduct, deleteProduct } from '@/actions/product.actions'
+import { createProduct, getProductByID, getProductsByUser, updateProduct, deleteProduct, getProducts } from '@/actions/product.actions'
 import { createSlice } from '@reduxjs/toolkit'
 
 
@@ -11,7 +11,7 @@ const ProductSlice = createSlice({
     product: {},
     products: [],
     userProducts: [],
-    // tagTours: [],
+    // tagProducts: [],
     // relatedTours: [],
     currentPage: 1,
     numberOfPages: null,
@@ -59,6 +59,18 @@ const ProductSlice = createSlice({
       state.error = action.payload.message;
     },
 
+    
+    [getProducts.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getProducts.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.userProducts = action.payload;
+    },
+    [getProducts.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload.message;
+    },
 
     [updateProduct.pending]: (state, action) => {
       state.loading = true;

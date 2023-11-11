@@ -97,12 +97,12 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
     },
     updatedAt: {
       allowNull: false,
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
     },
     
   },
@@ -138,12 +138,12 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
     },
     updatedAt: {
       allowNull: false,
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
     },
   },
   {

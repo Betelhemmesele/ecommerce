@@ -24,14 +24,14 @@ export default function Page() {
     // redirect user to login page if registration was successful
     if (success) router.push( '/login')
     // redirect authenticated user to profile screen
-    if (userInfo) router.push('/products')
+    if (userInfo && Object.keys(userInfo).length > 0) router.push('/products')
   }, [router, userInfo, success])
 
   const submitForm = (data) => {
     // check if passwords match
-    if (data.password !== data.confirmPassword) {
-      alert('Password mismatch')
-    }
+    // if (data.password !== data.confirmPassword) {
+    //   alert('Password mismatch')
+    // }
     // transform email string to lowercase to avoid case sensitivity issues in login
     data.email = data.email.toLowerCase()
     dispatch(registerUser(data))
@@ -90,6 +90,17 @@ export default function Page() {
                 />
               </div>
             </div>
+            <div className="mt-2">
+                <input
+                  id="location"
+                  name="location"
+                  type="string"
+                  {...register('location')}
+                  // autoComplete="current-name"
+                  
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                />
+              </div>
 
             <div>
               <label htmlFor="contactNum" className="block text-sm font-medium leading-6 text-gray-900">
@@ -98,10 +109,10 @@ export default function Page() {
               <div className="mt-2">
                 <input
                   id="contactNum"
-                  name="ContactNum"
+                  name="contact_number"
                   type="text"
                   // autoComplete="email"
-                  {...register('contactNum')}
+                  {...register('contact_number')}
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
@@ -143,6 +154,7 @@ export default function Page() {
                 />
               </div>
             </div>
+
 
             <div>
               <button
