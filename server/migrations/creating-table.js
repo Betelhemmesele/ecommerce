@@ -31,6 +31,10 @@ module.exports = {
       password: {
         type: Sequelize.STRING
       },
+      role: {
+        type:Sequelize.STRING,
+        defaultValue:'buyer',
+        },
       confirmationCode: {
         type: Sequelize.STRING
       },
@@ -72,7 +76,36 @@ module.exports = {
         type: Sequelize.BLOB('long'),
         allowNull: true,
       },
-      
+      discount: {
+        type: Sequelize.FLOAT,
+        allowNull: true,
+      },
+      content: {
+        type: Sequelize.TEXT,
+      },
+      shop: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      startsAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      endsAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      userId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -82,7 +115,159 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-      }
+      },
+    });
+    await queryInterface.createTable('carts', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      userId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+      sessionId: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      token: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      status: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      },
+      content: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+    });
+    await queryInterface.createTable('cart_items', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      SKU: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      price: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+      },
+      discount: {
+        type: Sequelize.FLOAT,
+        allowNull: true,
+      },
+      quantity: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      active: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      },
+      content: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      productId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'products',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+      cartId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'carts',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+    });
+    await queryInterface.createTable('product_reviews', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      productId: {
+        allowNull: false,
+        primaryKey: true,
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'products',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+      title: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      rating: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      published: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      },
+      publishedAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      content: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
     });
     await queryInterface.createTable('tags', {
       id: {
@@ -164,7 +349,62 @@ module.exports = {
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
     });
-  
+    await queryInterface.addConstraint('product_reviews', {
+      fields: ['productId'],
+      type: 'foreign key',
+      name: 'fk_product_reviews_productId',
+      references: {
+        table: 'products',
+        field: 'id',
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+    await queryInterface.addConstraint('carts', {
+      fields: ['userId'],
+      type: 'foreign key',
+      name: 'fk_carts_userId',
+      references: {
+        table: 'users',
+        field: 'id',
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+    await queryInterface.addConstraint('cart_items', {
+      fields: ['productId'],
+      type: 'foreign key',
+      name: 'fk_cart_items_productId',
+      references: {
+        table: 'products',
+        field: 'id',
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    await queryInterface.addConstraint('cart_items', {
+      fields: ['cartId'],
+      type: 'foreign key',
+      name: 'fk_cart_items_cartId',
+      references: {
+        table: 'carts',
+        field: 'id',
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+    await queryInterface.addConstraint('products', {
+      fields: ['userId'],
+      type: 'foreign key',
+      name: 'fk_products_userId',
+      references: {
+        table: 'users',
+        field: 'id',
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
   },
   
   async down(queryInterface, Sequelize) {
@@ -172,7 +412,15 @@ module.exports = {
     await queryInterface.dropTable('products');
     await queryInterface.dropTable('tags');
     await queryInterface.dropTable('product_tags');
+    await queryInterface.dropTable('product_reviews');
+    await queryInterface.dropTable('cart_items');
+    await queryInterface.dropTable('carts');
     await queryInterface.removeConstraint('product_tags', 'product_tags_productId_fkey');
+    await queryInterface.removeConstraint('carts', 'fk_carts_userId');
     await queryInterface.removeConstraint('product_tags', 'product_tags_tagId_fkey');
+    await queryInterface.removeConstraint('product_reviews', 'fk_product_reviews_productId');
+    await queryInterface.removeConstraint('cart_items','fk_cart_items_productId');
+    await queryInterface.removeConstraint('cart_items', 'fk_cart_items_cartId');
+    await queryInterface.removeConstraint('products', 'fk_products_userId');
   }
 };

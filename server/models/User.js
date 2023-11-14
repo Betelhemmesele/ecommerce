@@ -41,6 +41,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      role: {
+        type:DataTypes.STRING,
+        defaultValue:'buyer',
+        },
       confirmationCode: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -77,12 +81,175 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BLOB('long'),
       allowNull: true,
     },
+    discount: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    content: {
+      type: DataTypes.TEXT,
+    },
+    shop: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+    startsAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    endsAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: "id",
+      },
+    },
   },
     {
       tableName: "products",
       timestamps: true,
     },
   );
+  const ProductReview = sequelize.define(
+    "productReview",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true,
+      },
+    
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      rating: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      published: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      publishedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      content: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
+    },
+    {
+      tableName: "product_reviews",
+      timestamps: true,
+    }
+  );
+  const Cart = sequelize.define(
+    "cart",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true,
+      },
+      
+      sessionId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      token: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      content: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+    },
+    {
+      tableName: "carts",
+      timestamps: true,
+    }
+  );
+ const CartItem = sequelize.define(
+    "cartItem",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true,
+      },
+      SKU: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      price: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+      },
+      discount: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
+      quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      content: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+    },
+    {
+      tableName: "cart_items",
+      timestamps: true,
+    }
+  );
+  
   const Tag = sequelize.define('tags', {
     id: {
       allowNull: false,
@@ -151,9 +318,13 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
   },
   );
+  ProductReview.belongsTo(Products,{foreignkey:"productId"});
+  CartItem.belongsTo(Products, { foreignKey: "productId" });
+  CartItem.belongsTo(Cart, { foreignKey: "cartId" });
+  Cart.belongsTo(User, { foreignKey: "userId" });
   Products.belongsToMany(Tag, { through: ProductTag });
   Tag.belongsToMany(Products, { through: ProductTag });
-
+  Products.belongsTo(User, { foreignKey: "userId" });
   // Hash password before saving to the database
   User.beforeCreate(async (user) => {
     if (user.password) {
@@ -161,5 +332,5 @@ module.exports = (sequelize, DataTypes) => {
     }
   });
 
-  return {User,Products,ProductTag,Tag};
+  return {User,Products,ProductTag,Tag,Cart,CartItem,ProductReview };
 };

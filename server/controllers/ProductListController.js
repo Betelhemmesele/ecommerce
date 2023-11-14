@@ -2,21 +2,22 @@ const DataTypes = require("sequelize");
 const { sequelize } = require("../models/index");
 const Product = require('../models/User')(sequelize, DataTypes);
 const { Op } = require('sequelize');
-exports.productList=async(req, res) =>{
-    try {
-      const { title, description, price, category, images, tags } = req.body;
-  
-      // Create a new product listing
-      const product = await Product.Products.create({
-        title,
-        description,
-        price,
-        category,
-        images,
-      });
-      console.log('Tags:', tags);
-      // Associate tags with the product listing
-      // Associate tags with the product listing
+exports.productList = async (req, res) => {
+  try {
+    const { title, description, price, category, images, tags, userId } = req.body;
+
+    // Create a new product listing with the provided userId
+    const product = await Product.Products.create({
+      title,
+      description,
+      price,
+      category,
+      images,
+      userId, // Add the userId to the product creation
+    });
+
+    console.log('Tags:', tags);
+
     if (tags && tags.length > 0) {
       const existingTags = await Product.Tag.findAll({
         where: {
@@ -32,16 +33,36 @@ exports.productList=async(req, res) =>{
         const createdTag = await Product.Tag.create({ name: tagName });
         existingTags.push(createdTag);
       }
+
       console.log('Tag Instances:', existingTags);
       console.log('Adding tags to product...');
-      // const now = Date.now();
-      await product.addTags(existingTags);
+      const now = Date.now();
+      await product.addTags(existingTags, { through: { createdAt: now, updatedAt: now } });
     }
-        
-        
-      res.status(201).json({ success: true, product });
+
+    res.status(201).json({ success: true, product });
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+};
+  exports.getProductsBySeller = async (req, res) => {
+    try {
+      const sellerId = req.params.sellerId;
+  
+      const products = await Product.findAll({
+        where: {
+          userId: sellerId,
+        },
+      });
+  
+      if (products.length === 0) {
+        return res.status(404).json({ success: false, error: 'No products found for the specified seller' });
+      }
+  
+      res.status(200).json({ success: true, products });
     } catch (error) {
-      console.error('Error creating product:', error);
+      console.error('Error retrieving products:', error);
       res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   };
