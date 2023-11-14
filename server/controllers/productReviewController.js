@@ -1,16 +1,37 @@
 const model= require('../models/User')(sequelize,DataTypes);
 
 // Create a new product review
-async function createProductReview(req, res) {
+// Create or update a product review
+async function createOrUpdateProductReview(req, res) {
   try {
-    const { productId, title, rating, published, content } = req.body;
+    const { title, rating, published, content, productId } = req.body;
+    const userId = req.user.id;
+
+    // Check if a review already exists for the given user and product
+    const existingReview = await model.ProductReview.findOne({
+      where: {
+        userId,
+        productId,
+      },
+    });
+
+    if (existingReview) {
+      // Update the number of stars (rating) in the existing review
+      existingReview.rating = rating;
+      await existingReview.save();
+
+      return res.status(200).json(existingReview);
+    }
+
     const productReview = await model.ProductReview.create({
+      userId,
       productId,
       title,
       rating,
       published,
       content,
     });
+
     res.status(201).json(productReview);
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
@@ -76,7 +97,7 @@ async function deleteProductReview(req, res) {
 }
 
 module.exports = {
-  createProductReview,
+  createOrUpdateProductReview,
   getAllProductReviews,
   getProductReviewsByProductId,
   updateProductReview,

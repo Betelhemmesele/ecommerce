@@ -155,6 +155,13 @@ module.exports = (sequelize, DataTypes) => {
     {
       tableName: "product_reviews",
       timestamps: true,
+      indexes: [
+        // Add a unique constraint to the combination of userId and productId
+        {
+          unique: true,
+          fields: ['userId', 'productId'],
+        },
+      ],
     }
   );
   const Cart = sequelize.define(
@@ -319,9 +326,11 @@ module.exports = (sequelize, DataTypes) => {
   },
   );
   ProductReview.belongsTo(Products,{foreignkey:"productId"});
+  ProductReview.belongsTo(User,{foreignKey:"userId"});
   CartItem.belongsTo(Products, { foreignKey: "productId" });
   CartItem.belongsTo(Cart, { foreignKey: "cartId" });
   Cart.belongsTo(User, { foreignKey: "userId" });
+  User.hasMany(ProductReview,{foreignKey:"userId"});
   Products.belongsToMany(Tag, { through: ProductTag });
   Tag.belongsToMany(Products, { through: ProductTag });
   Products.belongsTo(User, { foreignKey: "userId" });
