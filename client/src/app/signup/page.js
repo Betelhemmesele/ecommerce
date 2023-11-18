@@ -6,15 +6,25 @@ import { useRouter } from 'next/navigation'
 
 import { registerUser } from '../../actions/auth.actions'
 import { useEffect } from "react";
+import { createSelector } from "@reduxjs/toolkit";
 
 
-
+const authSelector = (state) => state.auth;
+const loadingSelector = createSelector(authSelector, (auth) => auth.loading);
+const userInfoSelector = createSelector(authSelector, (auth) => auth.userInfo);
+const errorSelector = createSelector(authSelector, (auth) => auth.error);
+const successSelector = createSelector(authSelector, (auth) => auth.success);
 
 export default function Page() {
 
-  const { loading, userInfo, error, success } = useSelector(
-    (state) => state.auth
-  )
+  // const { loading, userInfo, error, success } = useSelector(
+  //   (state) => state.auth
+  // )
+
+  const loading = useSelector(loadingSelector);
+  const userInfo = useSelector(userInfoSelector);
+  const error = useSelector(errorSelector);
+  const success = useSelector(successSelector);
 
   const router = useRouter();
   const dispatch = useDispatch()
@@ -22,24 +32,21 @@ export default function Page() {
 
   useEffect(() => {
     // redirect user to login page if registration was successful
-    if (success) router.push( '/login')
+    if (success) router.push('/login')
     // redirect authenticated user to profile screen
-    if (userInfo && Object.keys(userInfo).length > 0) router.push('/products')
+    if (userInfo && Object.keys(userInfo).length > 0) router.push('/login')
   }, [router, userInfo, success])
 
   const submitForm = (data) => {
-    // check if passwords match
-    // if (data.password !== data.confirmPassword) {
-    //   alert('Password mismatch')
-    // }
-    // transform email string to lowercase to avoid case sensitivity issues in login
-    data.email = data.email.toLowerCase()
+    // data.email = data.email.toLowerCase()
     dispatch(registerUser(data))
   }
 
+  console.log("user", userInfo)
+
   return (
     <>
-      <div className="flex h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+      <div className="flex h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 bg-white">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           {/* <img
               className="mx-auto h-10 w-auto"
@@ -91,16 +98,16 @@ export default function Page() {
               </div>
             </div>
             <div className="mt-2">
-                <input
-                  id="location"
-                  name="location"
-                  type="string"
-                  {...register('location')}
-                  // autoComplete="current-name"
-                  
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-              </div>
+              <input
+                id="location"
+                name="location"
+                type="string"
+                {...register('location')}
+                // autoComplete="current-name"
+
+                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              />
+            </div>
 
             <div>
               <label htmlFor="contactNum" className="block text-sm font-medium leading-6 text-gray-900">

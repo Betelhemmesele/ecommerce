@@ -1,7 +1,7 @@
 
 "use client";
 import { combineReducers, configureStore  } from "@reduxjs/toolkit";
-import authReducer from '@/reduxSlices/UserSlice';
+import authReducer from '@/reduxSlices/authSlice';
 import productReducer from '@/reduxSlices/ProductSlice';
 import modalReducer from '@/reduxSlices/ModalSlice';
 

@@ -1,64 +1,46 @@
 "use client";
 import { closeEditModal } from "@/actions/modals.actions";
-import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import { createProduct, updateProduct } from "@/actions/product.actions";
+import { useParams } from "next/navigation";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { createSelector } from "reselect";
 
 const initialState = {
   title: "",
   description: "",
   price: "",
   category: "",
-  tags: [],
+  tags: ["black", "small", "slim", "LED"],
+  image: null,
+  userId: "",
 };
 
-const AddProductEdit = ({ id }) => {
-  const [productData, setProductData] = useState(initialState);
-  const [tagErrMsg, setTagErrMsg] = useState(null);
-  const { error, userProducts } = useSelector((state) => ({
-    ...state.product,
-  }));
-  const { user } = useSelector((state) => ({ ...state.auth }));
+const authSelector = (state) => state.auth;
+const userInfoSelector = createSelector(authSelector, (auth) => auth.userInfo);
+
+const AddProductEdit = () => {
   const dispatch = useDispatch();
+  const { id } = useParams();
+  const [productData, setProductData] = useState(initialState);
+  // const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  const userInfo = useSelector(userInfoSelector);
 
   const { title, description, price, category, tags } = productData;
-
-  useEffect(() => {
-    if (id) {
-      const singleProduct = userProducts.find((product) => product._id === id);
-      console.log(singleProduct);
-      setProductData({ ...singleProduct });
-    }
-  }, [id]);
-
-  useEffect(() => {
-    error && toast.error(error);
-  }, [error]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!tags.length) {
-      setTagErrMsg("Please provide some tags");
-    }
-    if (title && description && price && category && tags) {
-      const updatedProductData = { ...productData, name: user?.result?.name };
-
-      if (!id) {
-        dispatch(createProduct({ updatedProductData, navigate, toast }));
-      } else {
-        dispatch(updateProduct({ id, updatedProductData, toast, navigate }));
-      }
-      handleClear();
-    }
-  };
 
   const onInputChange = (e) => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
+    setProductData((prevState) => ({
+      ...prevState,
+      userId: userInfo.id,
+    }));
   };
 
   const removeTagData = (deleteTag) => {
-    setTourData({
+    setProductData({
       ...productData,
       tags: productData.tags.filter((tag) => tag !== deleteTag),
     });
@@ -68,263 +50,260 @@ const AddProductEdit = ({ id }) => {
     setTagErrMsg(null);
     if (event.target.value !== "") {
       setProductData({
-        ...productrData,
+        ...productData,
         tags: [...productData.tags, event.target.value],
       });
       event.target.value = "";
     }
   };
 
-  const onImageChange = (event) => {
-    console.log(event.target.files[0]);
-    let files = event.target.files;
-    let reader = new FileReader();
-    reader.readAsDataURL(files[0]);
+  // const onImageChange = (event) => {
+  //   console.log(event.target.files[0]);
+  //    setSelectedFile(event.target.files[0]);
+  //   const reader = new FileReader();
+  //   reader.readAsArrayBuffer(selectedFile);
+  //   reader.onload = () => {
+  //     const blob = new Blob([reader.result], { type: selectedFile.type });
+  //     uploadImage(blob);
+  //   }
+  // };
 
-    reader.onload = (e) => {
-      setProductData({ ...productData, imageFile: e.target.result });
-    };
+  // const uploadImage = (blob) => {
+  //   const formData = new FormData();
+  //   formData.append('image', blob, selectedFile.name);
+
+  //   setProductData({ ...productData, images: formData });
+  // }
+
+  const onImageChange = (event) => {
+    setSelectedFiles(Array.from(event.target.files));
+    setProductData({ ...productData, image: selectedFiles });
   };
 
-  const [showError, setShowError] = useState(false);
+  const renderPreviewImages = () => {
+    return selectedFiles.map((file, index) => (
+      <img
+        key={index}
+        src={URL.createObjectURL(file)}
+        alt="Preview"
+        style={{ width: "30%" }}
+      />
+    ));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(productData);
+    if (id) {
+      dispatch(updateProduct({ id, productData }));
+    } else {
+      dispatch(createProduct(productData));
+    }
+    setProductData({});
+  };
 
   return (
-    <div>
-      {/* <div className="container-fluid">
-        <div className="form-box">
-          {/* <h1>Add</h1> 
-
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="name">Name</label>
-              <input
-                className="form-control"
-                id="name"
-                type="text"
-                value={title || ""}
-                name="title"
-                placeholder="Name"
-                onChange={onInputChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="message">Description</label>
-              <textarea
-                className="form-control"
-                id="message"
-                value={description}
-                name="description"
-                placeholder="description"
-                onChange={onInputChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="price">Price</label>
-              <input
-                className="form-control"
-                id="price"
-                type="number"
-                value={price || ""}
-                name="price"
-                placeholder="0"
-                onChange={onInputChange}
-              />
-            </div>
-            <div className="form-group">
-              <label for="category">Select the category:</label>
-              <select id="category" name="category">
-                <option value={ category || "computers"}>Computers and Laptops</option>
-                <option value={ category || "mobile"}>Mobile Devices</option>
-                <option value={ category || "tv"}>Televisions and Home Theater</option>
-                <option value="audio">Audio and Headphones</option>
-                <option value="cameras">Cameras and Photography</option>
-                <option value="gaming">Gaming</option>
-                <option value="appliances">Home Appliances</option>
-                <option value="smart-home">Smart Home Devices</option>
-                <option value="wearable">Wearable Technology</option>
-                <option value="accessories">Accessories and Cables</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="email">Image</label>
-              <input
-                className="form-control"
-                accept="image/*"
-                onChange={onImageChange}
-                type="file"
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="message">Tag</label>
-              <div className="tag-input">
-                <ul className="tags">
-                  {tags &&
-                    tags.map((tag, index) => (
-                      <li key={index} className="tag">
-                        <span className="tag-title">{tag}</span>
-                        <span
-                          className="tag-close-icon"
-                          onClick={() => removeTagData(tag)}
-                        >
-                          x
+    <form
+      action="/upload"
+      method="POST"
+      enctype="multipart/form-data"
+      onSubmit={handleSubmit}
+    >
+      <div className="relative  flex  justify-center bg-center bg-gray-50 py-[25px] px-4 sm:px-6 lg:px-8  bg-no-repeat bg-cover  items-center">
+        <div className="absolute bg-black opacity-60 inset-0 z-0"></div>
+        <div className="max-w-md w-full  p-10 bg-white rounded-xl shadow-lg z-10">
+          <div className="grid  gap-8 grid-cols-1">
+            <div className="flex flex-col ">
+              <div className="flex flex-col sm:flex-row items-center">
+                <h2 className="font-semibold text-lg mr-auto">Product Info</h2>
+                <div className="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0"></div>
+              </div>
+              <div className="mt-5">
+                <div className="form">
+                  <div className="md:space-y-2 mb-3">
+                    <label className="text-xs font-semibold text-gray-600 py-2">
+                      Product image
+                      <abbr className="hidden" title="required">
+                        *
+                      </abbr>
+                    </label>
+                    <div className="flex gap-1">
+                      <div className="w-[180px]">{renderPreviewImages()}</div>
+                      <label className="cursor-pointer ">
+                        <span className="focus:outline-none text-white text-sm py-2 px-4 rounded-full bg-green-400 hover:bg-green-500 hover:shadow-lg">
+                          Browse image
                         </span>
-                      </li>
-                    ))}
-                </ul>
-                <input
-                  className="tag_input"
-                  type="text"
-                  onKeyUp={(event) =>
-                    event.key === "Enter" ? addTagData(event) : null
-                  }
-                  placeholder="Press enter to add a tag"
-                />
+                        <input
+                          type="file"
+                          className="hidden"
+                          multiple="multiple"
+                          // accept="image/*"
+                          onChange={onImageChange}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  <div className="md:flex flex-row md:space-x-4 w-full text-xs">
+                    <div className="mb-3 space-y-2 w-full text-xs">
+                      <label className="font-semibold text-gray-600 py-2">
+                        Product Name <abbr title="required">*</abbr>
+                      </label>
+                      <input
+                        placeholder="iphone, Mac"
+                        className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded-lg h-10 px-4"
+                        required="required"
+                        type="text"
+                        name="title"
+                        id="name"
+                        value={title || ""}
+                        onChange={onInputChange}
+                      />
+                      <p className="text-red text-xs hidden">
+                        Please fill out this field.
+                      </p>
+                    </div>
+                    <div className="mb-3 space-y-2 w-full text-xs">
+                      <label className="font-semibold text-gray-600 py-2">
+                        Price <abbr title="required">*</abbr>
+                      </label>
+                      <input
+                        placeholder="1000 in birr"
+                        className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded-lg h-10 px-4"
+                        required="required"
+                        type="number"
+                        name="price"
+                        id="price"
+                        value={price || ""}
+                        onChange={onInputChange}
+                      />
+                      <p className="text-red text-xs hidden">
+                        Please fill out this field.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="md:flex md:flex-row md:space-x-4 w-full text-xs">
+                    <div className="w-full flex flex-col mb-3">
+                      <label className="font-semibold text-gray-600 py-2">
+                        Give tag
+                      </label>
+                      <ul className="tags">
+                        {tags &&
+                          tags.map((tag, index) => (
+                            <li key={index} className="tag">
+                              <span className="tag-title">{tag}</span>
+                              <span
+                                className="tag-close-icon"
+                                onClick={() => removeTagData(tag)}
+                              >
+                                x
+                              </span>
+                            </li>
+                          ))}
+                      </ul>
+                      <input
+                        placeholder="Press enter to add a tag"
+                        className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded-lg h-10 px-4"
+                        type="text"
+                        name="tag"
+                        id="tag"
+                        onKeyUp={(event) =>
+                          event.key === "Enter" ? addTagData(event) : null
+                        }
+                      />
+                    </div>
+                    <div className="w-full flex flex-col mb-3">
+                      <label className="font-semibold text-gray-600 py-2">
+                        Category<abbr title="required">*</abbr>
+                      </label>
+                      <select
+                        className="block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded-lg h-10 px-4 md:w-full "
+                        required="required"
+                        name="category"
+                        id="category"
+                        value={category || ""}
+                        onChange={onInputChange}
+                      >
+                        <option
+                          value=""
+                          disabled
+                          hidden
+                          className="text-gray-500"
+                        >
+                          Select the category
+                        </option>
+                        <option value={"computers"}>
+                          Computers and Laptops
+                        </option>
+                        <option value={"mobile"}>Mobile Devices</option>
+                        <option value={"tv"}>
+                          Televisions and Home Theater
+                        </option>
+                        <option value="audio">Audio and Headphones</option>
+                        <option value="cameras">Cameras and Photography</option>
+                        <option value="gaming">Gaming</option>
+                        <option value="appliances">Home Appliances</option>
+                        <option value="smart-home">Smart Home Devices</option>
+                        <option value="wearable">Wearable Technology</option>
+                        <option value="accessories">
+                          Accessories and Cables
+                        </option>
+                      </select>
+                      <p
+                        className="text-sm text-red-500 hidden mt-3"
+                        id="error"
+                      >
+                        Please fill out this field.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex-auto w-full mb-1 text-xs space-y-2">
+                    <label className="font-semibold text-gray-600 py-2">
+                      Description
+                    </label>
+                    <textarea
+                      required=""
+                      name="description"
+                      id="message"
+                      className="w-full min-h-[100px] max-h-[300px] h-28 appearance-none block bg-grey-lighter text-grey-darker border border-grey-lighter rounded-lg  py-4 px-4"
+                      placeholder="Enter your Product info"
+                      spellCheck="false"
+                      value={description || ""}
+                      onChange={onInputChange}
+                    ></textarea>
+                    <p className="text-xs text-gray-400 text-left my-3">
+                      You inserted 0 characters
+                    </p>
+                  </div>
+                  <p className="text-xs text-red-500 text-right my-3">
+                    Required fields are marked with an asterisk{" "}
+                    <abbr title="Required field">*</abbr>
+                  </p>
+                  <div className="mt-5 text-right md:space-x-3 md:block flex flex-col-reverse"></div>
+                </div>
               </div>
             </div>
-          </form>
-        </div>
-      </div> */}
-
-      <div className="bg-gray-100 p-0 sm:p-[12px]">
-        <div className="mx-auto px-6 py-12 bg-white border-0 shadow-lg sm:rounded-3xl">
-          <h1 className="text-2xl font-bold mb-8">Create your product</h1>
-          <form id="form">
-            <div className="relative z-0 w-full mb-5">
-              <input
-                id="name"
-                type="text"
-                value={title || ""}
-                name="title"
-                placeholder="Title of the product"
-                onChange={onInputChange}
-                className="pt-3 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200"
-              />
-              <span
-                className={`text-sm text-red-600 ${showError ? "" : "hidden"}`}
-                id="error"
-              >
-                Name is required
-              </span>
-            </div>
-
-            <div>
-              <textarea
-                className="w-full rounded-lg border-gray-600 p-3 text-sm"
-                placeholder="Give some description for the product"
-                rows="8"
-                id="message"
-                onChange={onInputChange}
-              ></textarea>
-            </div>
-
-            <div className="relative z-0 w-full mb-5">
-              <select
-                id="category"
-                name="category"
-                onClick={(e) => e.target.setAttribute("value", e.target.value)}
-                className="pt-3 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none z-1 focus:outline-none focus:ring-0 focus:border-black border-gray-200"
-              >
-                <option
-                  value=""
-                  selected
-                  disabled
-                  hidden
-                  className="text-gray-500"
-                ></option>
-                <option value={category || "computers"}>
-                  Computers and Laptops
-                </option>
-                <option value={category || "mobile"}>Mobile Devices</option>
-                <option value={category || "tv"}>
-                  Televisions and Home Theater
-                </option>
-                <option value="audio">Audio and Headphones</option>
-                <option value="cameras">Cameras and Photography</option>
-                <option value="gaming">Gaming</option>
-                <option value="appliances">Home Appliances</option>
-                <option value="smart-home">Smart Home Devices</option>
-                <option value="wearable">Wearable Technology</option>
-                <option value="accessories">Accessories and Cables</option>
-              </select>
-              <span
-                className={`text-sm text-red-600 ${showError ? "" : "hidden"}`}
-                id="error"
-              >
-                Option has to be selected
-              </span>
-            </div>
-
-            <div className="relative z-0 w-full mb-5">
-              <input
-                className="form-control"
-                id="price"
-                type="number"
-                value={price || ""}
-                name="price"
-                placeholder="0"
-                onChange={onInputChange}
-              />
-              <span
-                className={`text-sm text-red-600 ${showError ? "" : "hidden"}`}
-                id="error"
-              >
-                Price is required
-              </span>
-            </div>
-
-            <div className="relative z-0 w-full mb-5">
-            <label htmlFor="image" className="text-gray-500">Add Image</label>
-            <input
-              accept="image/*"
-              onChange={onImageChange}
-              name="image"
-              type="file"
-              className="file-input file-input-bordered file-input-secondary w-full max-w-xs"
-            />
-            <span
-                className={`text-sm text-red-600 ${showError ? "" : "hidden"}`}
-                id="error"
-              >
-              Image file is required
-            </span>
-            </div>
-
-           <div className="tag-input">
-                <ul className="tags">
-                  {tags &&
-                    tags.map((tag, index) => (
-                      <li key={index} className="tag">
-                        <span className="tag-title">{tag}</span>
-                        <span
-                          className="tag-close-icon"
-                          onClick={() => removeTagData(tag)}
-                        >
-                          x
-                        </span>
-                      </li>
-                    ))}
-                </ul>
-                <input
-                  className="pt-3 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200"
-                  type="text"
-                  onKeyUp={(event) =>
-                    event.key === "Enter" ? addTagData(event) : null
-                  }
-                  placeholder="Press enter to add a tag"
-                />
-                <span
-                className={`text-sm text-red-600 ${showError ? "" : "hidden"}`}
-                id="error"
-              >
-              Tag is required
-            </span>
-              </div>
-
-            {/* Rest of the form code goes here */}
-          </form>
+          </div>
         </div>
       </div>
-    </div>
+      <div className="modal-action">
+        <div className="flex gap-10 ">
+          <button
+            className="mb-2 md:mb-0 bg-white px-5 py-2 text-sm shadow-sm font-medium tracking-wider border text-gray-600 rounded-full hover:shadow-lg hover:bg-gray-100"
+            onClick={() => dispatch(closeEditModal())}
+          >
+            Cancel
+          </button>
+          <button
+            className="mb-2 md:mb-0 bg-green-400 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg hover:bg-green-500"
+            type="submit"
+            onClick={() => dispatch(closeEditModal())}
+          >
+            Save
+          </button>
+        </div>
+        {/* </form> */}
+      </div>
+    </form>
   );
 };
 

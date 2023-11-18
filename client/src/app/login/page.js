@@ -7,14 +7,23 @@ import { useRouter } from 'next/navigation'
 
 import { userLogin } from '../../actions/auth.actions'
 import { useEffect } from 'react';
+import { createSelector } from '@reduxjs/toolkit';
 
+const authSelector = (state) => state.auth;
+const loadingSelector = createSelector(authSelector, (auth) => auth.loading);
+const userInfoSelector = createSelector(authSelector, (auth) => auth.userInfo);
+const errorSelector = createSelector(authSelector, (auth) => auth.error);
 
 export default function Page() {
 
-  const { loading, userInfo, error } = useSelector((state) => state.auth)
+  // const { loading, userInfo, error } = useSelector((state) => state.auth)
+  const loading = useSelector(loadingSelector);
+  const userInfo = useSelector(userInfoSelector);
+  const error = useSelector(errorSelector);
   const dispatch = useDispatch()
   const { register, handleSubmit } = useForm()
   const router = useRouter();
+
 
 
 
@@ -32,7 +41,7 @@ export default function Page() {
 
     return (
       <>
-        <div className="flex h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        <div className="flex h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 bg-white">
           <div className="sm:mx-auto sm:w-full sm:max-w-sm">
             {/* <img
               className="mx-auto h-10 w-auto"

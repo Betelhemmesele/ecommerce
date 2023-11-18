@@ -2,9 +2,17 @@ const DataTypes = require("sequelize");
 const { sequelize } = require("../models/index");
 const Product = require('../models/User')(sequelize, DataTypes);
 const { Op } = require('sequelize');
+const fs = require("fs");
 exports.productList = async (req, res) => {
+
+  console.log(req.file);
+
+  if (req.file == undefined) {
+    return res.send(`You must select a file.`);
+  }
+
   try {
-    const { title, description, price, category, images, tags, userId } = req.body;
+    const { title, description, price, category, tags, userId } = req.body;
 
     // Create a new product listing with the provided userId
     const product = await Product.Products.create({
@@ -12,8 +20,17 @@ exports.productList = async (req, res) => {
       description,
       price,
       category,
-      images,
+      images:fs.readFileSync(
+        __basedir + "/resources/static/assets/uploads/" + req.file.filename
+      ),
       userId, // Add the userId to the product creation
+    }).then((images) => {
+      fs.writeFileSync(
+        __basedir + "/resources/static/assets/tmp/" + images.name,
+        images.data
+      );
+
+      return res.send(`File has been uploaded.`);
     });
 
     console.log('Tags:', tags);

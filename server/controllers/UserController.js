@@ -96,6 +96,8 @@ exports.loginUser = async (req, res, next) => {
       id: user.id,
     });
 
+    const id = user.id
+
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: false,
@@ -103,7 +105,7 @@ exports.loginUser = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ token });
+    res.json({ token, id });
     console.log("Logged in");
   } catch (error) {
     console.error(error);

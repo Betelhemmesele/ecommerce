@@ -40,14 +40,19 @@ export const userLogin = createAsyncThunk(
             'Content-Type': 'application/json',
           },
         }
-        const { data } = await axios.post(
+        const response  = await axios.post(
           `http://localhost:3009/backend/users/login`,
           { email, password },
           config
         )
         // store user's token in local storage
-        localStorage.setItem('userToken', data.userToken)
-        return data
+        localStorage.setItem('userToken', response.data.token)
+        // console.log(response);
+        const user={
+          email: email,
+          id: response.data.id,
+        }
+        return {response, user}
       } catch (error) {
         // return custom error message from API if any
         if (error.response && error.response.data.message) {

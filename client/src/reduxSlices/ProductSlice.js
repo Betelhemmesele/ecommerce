@@ -5,14 +5,14 @@ import { createProduct, getProductByID, getProductsByUser, updateProduct, delete
 import { createSlice } from '@reduxjs/toolkit'
 
 
+
+
 const ProductSlice = createSlice({
   name: "product",
   initialState: {
     product: {},
     products: [],
     userProducts: [],
-    // tagProducts: [],
-    // relatedTours: [],
     currentPage: 1,
     numberOfPages: null,
     error: "",
@@ -23,81 +23,78 @@ const ProductSlice = createSlice({
       state.currentPage = action.payload;
     },
   },
-  extraReducers: {
-    [createProduct.pending]: (state, action) => {
+  extraReducers:  (builder) => {
+    builder
+    .addCase(createProduct.pending, (state) => {
       state.loading = true;
-    },
-    [createProduct.fulfilled]: (state, action) => {
+    })
+    .addCase(createProduct.fulfilled, (state,  { payload }) => {
       state.loading = false;
-      state.tours = [action.payload];
-    },
-    [createProduct.rejected]: (state, action) => {
+      state.product = payload.data;
+      // state.userProducts = [...payload];
+    })
+    .addCase(createProduct.rejected, (state,  { payload }) => {
       state.loading = false;
-      state.error = action.payload.message;
-    },
-    [getProductByID.pending]: (state, action) => {
+      state.error = payload;
+    })
+    .addCase(getProductByID.pending, (state) => {
       state.loading = true;
-    },
-    [getProductByID.fulfilled]: (state, action) => {
+    })
+    .addCase(getProductByID.fulfilled, (state,  { payload }) => {
       state.loading = false;
-      state.userTours = action.payload;
-    },
-    [getProductByID.rejected]: (state, action) => {
+      state.userProducts = payload;
+    })
+    .addCase(getProductByID.rejected, (state,  { payload }) => {
       state.loading = false;
-      state.error = action.payload.message;
-    },
-
-    [getProductsByUser.pending]: (state, action) => {
+      state.error = payload;
+    })
+    .addCase(getProductsByUser.pending, (state) => {
       state.loading = true;
-    },
-    [getProductsByUser.fulfilled]: (state, action) => {
+    })
+    .addCase(getProductsByUser.fulfilled, (state,  { payload }) => {
       state.loading = false;
-      state.userProducts = action.payload;
-    },
-    [getProductsByUser.rejected]: (state, action) => {
+      state.userProducts = payload;
+    })
+    .addCase(getProductsByUser.rejected, (state,  { payload }) => {
       state.loading = false;
-      state.error = action.payload.message;
-    },
-
-    
-    [getProducts.pending]: (state, action) => {
+      state.error = payload.message;
+    })
+    .addCase(getProducts.pending, (state) => {
       state.loading = true;
-    },
-    [getProducts.fulfilled]: (state, action) => {
+    })
+    .addCase(getProducts.fulfilled, (state,  { payload }) => {
       state.loading = false;
-      state.userProducts = action.payload;
-    },
-    [getProducts.rejected]: (state, action) => {
+      state.userProducts = payload;
+    })
+    .addCase(getProducts.rejected, (state,  { payload }) => {
       state.loading = false;
-      state.error = action.payload.message;
-    },
-
-    [updateProduct.pending]: (state, action) => {
+      state.error = payload.message;
+    })
+    .addCase(updateProduct.pending, (state) => {
       state.loading = true;
-    },
-    [updateProduct.fulfilled]: (state, action) => {
+    })
+    .addCase(updateProduct.fulfilled, (state,  { payload }) => {
       state.loading = false;
       const {
         arg: { id },
       } = action.meta;
       if (id) {
         state.userProducts = state.userProducts.map((item) =>
-          item._id === id ? action.payload : item
+          item._id === id ? payload : item
         );
         state.products = state.products.map((item) =>
-          item._id === id ? action.payload : item
+          item._id === id ? payload : item
         );
       }
-    },
-    [updateProduct.rejected]: (state, action) => {
+    })
+    .addCase(updateProduct.rejected, (state,  { payload }) => {
       state.loading = false;
-      state.error = action.payload.message;
-    }
-    ,
-    [deleteProduct.pending]: (state, action) => {
+      state.error = payload.message;
+    })
+    .addCase(deleteProduct.pending, (state) => {
       state.loading = true;
-    },
-    [deleteProduct.fulfilled]: (state, action) => {
+    })
+    .addCase(deleteProduct.fulfilled, (state,  action) => {
       state.loading = false;
       const {
         arg: { id },
@@ -106,13 +103,12 @@ const ProductSlice = createSlice({
         state.userProducts = state.userProducts.filter((item) => item._id !== id);
         state.products = state.products.filter((item) => item._id !== id);
       }
-    },
-    [deleteProduct.rejected]: (state, action) => {
+    })
+    .addCase(deleteProduct.rejected, (state,  { payload }) => {
       state.loading = false;
-      state.error = action.payload.message;
-    },
-
-  },
+      state.error = payload.message;
+    })
+},
 });
 
 export const { setCurrentPage } = ProductSlice.actions;
