@@ -80,15 +80,6 @@ module.exports = (sequelize, DataTypes) => {
     image: {
       type: DataTypes.BLOB('long'),
       allowNull: true,
-      // type: {
-      //   type: DataTypes.STRING,
-      // },
-      // name: {
-      //   type: DataTypes.STRING,
-      // },
-      // data: {
-      //   type: DataTypes.BLOB("long"),
-      // },
     },
     discount: {
       type: DataTypes.FLOAT,

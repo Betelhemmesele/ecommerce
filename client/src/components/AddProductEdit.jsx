@@ -11,7 +11,7 @@ const initialState = {
   description: "",
   price: "",
   category: "",
-  tags: ["black", "small", "slim", "LED"],
+  tags: "",
   image: null,
   userId: "",
 };
@@ -39,23 +39,30 @@ const AddProductEdit = () => {
     }));
   };
 
-  const removeTagData = (deleteTag) => {
+  function handleKeyDown(e) {
+    // If user did not press enter key, return
+    if (e.key !== "Insert") return;
+    // Get the value of the input
+    const value = e.target.value;
+    // If the value is empty, return
+    if (!value.trim()) return;
+    // Add the value to the tags array
+    // setTaglist([...taglist, value])
     setProductData({
       ...productData,
-      tags: productData.tags.filter((tag) => tag !== deleteTag),
+      tags: [...productData.tags, value],
     });
-  };
+    // Clear the input
+    e.target.value = "";
+  }
 
-  const addTagData = (event) => {
-    setTagErrMsg(null);
-    if (event.target.value !== "") {
-      setProductData({
-        ...productData,
-        tags: [...productData.tags, event.target.value],
-      });
-      event.target.value = "";
-    }
-  };
+  function removeTag(deleteTag) {
+    // setTaglist(tags.filter((el, i) => i !== index))
+    setProductData({
+      ...productData,
+      tags: productData.tags.filter((el, tag) => tag !== deleteTag),
+    });
+  }
 
   // const onImageChange = (event) => {
   //   console.log(event.target.files[0]);
@@ -104,9 +111,9 @@ const AddProductEdit = () => {
 
   return (
     <form
-      action="/upload"
-      method="POST"
-      enctype="multipart/form-data"
+      // action="/upload"
+      // method="POST"
+      // enctype="multipart/form-data"
       onSubmit={handleSubmit}
     >
       <div className="relative  flex  justify-center bg-center bg-gray-50 py-[25px] px-4 sm:px-6 lg:px-8  bg-no-repeat bg-cover  items-center">
@@ -183,33 +190,29 @@ const AddProductEdit = () => {
                   </div>
                   <div className="md:flex md:flex-row md:space-x-4 w-full text-xs">
                     <div className="w-full flex flex-col mb-3">
-                      <label className="font-semibold text-gray-600 py-2">
-                        Give tag
-                      </label>
-                      <ul className="tags">
+                      <div className="border-2 border-black p-2 rounded-md w-min[80vw, 600px] mt-4 flex items-center flex-wrap gap-2">
                         {tags &&
                           tags.map((tag, index) => (
-                            <li key={index} className="tag">
-                              <span className="tag-title">{tag}</span>
+                            <div
+                              className="bg-gray-300 inline-block px-2 py-1 rounded-full"
+                              key={index}
+                            >
+                              <span className="text">{tag}</span>
                               <span
-                                className="tag-close-icon"
-                                onClick={() => removeTagData(tag)}
+                                className="close flex items-center justify-center h-5 w-5 bg-gray-800 text-white rounded-full ml-2 text-base cursor-pointer"
+                                onClick={() => removeTag(index)}
                               >
-                                x
+                                &times;
                               </span>
-                            </li>
+                            </div>
                           ))}
-                      </ul>
-                      <input
-                        placeholder="Press enter to add a tag"
-                        className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded-lg h-10 px-4"
-                        type="text"
-                        name="tag"
-                        id="tag"
-                        onKeyUp={(event) =>
-                          event.key === "Enter" ? addTagData(event) : null
-                        }
-                      />
+                        <input
+                          type="text"
+                          className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded-lg h-10 px-4"
+                          placeholder="Type & press insert "
+                          onKeyDown={handleKeyDown}
+                        />
+                      </div>
                     </div>
                     <div className="w-full flex flex-col mb-3">
                       <label className="font-semibold text-gray-600 py-2">
@@ -290,6 +293,7 @@ const AddProductEdit = () => {
           <button
             className="mb-2 md:mb-0 bg-white px-5 py-2 text-sm shadow-sm font-medium tracking-wider border text-gray-600 rounded-full hover:shadow-lg hover:bg-gray-100"
             onClick={() => dispatch(closeEditModal())}
+            // onKeyDown={handleKeyDownClose}
           >
             Cancel
           </button>
@@ -297,6 +301,7 @@ const AddProductEdit = () => {
             className="mb-2 md:mb-0 bg-green-400 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg hover:bg-green-500"
             type="submit"
             onClick={() => dispatch(closeEditModal())}
+            // onKeyDown={handleKeyDownClose}
           >
             Save
           </button>

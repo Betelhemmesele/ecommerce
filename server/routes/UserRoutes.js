@@ -26,7 +26,7 @@ const {
 //   updateProductReview,
 //   deleteProductReview,
 // }=require("../controllers/productReviewController.js");
-const upload = require("../middelware/upload.js");
+
 
 router.post("/register", registerUser);
 router.post("/confirm", confirmEmail);
@@ -36,7 +36,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset_password/:id/:token", resetPassword);
 
 router.get("/alluser",getAllUsers)
-router.post("/createProducts", upload.single("file"),productList);
+router.post("/createProducts",productList);
 router.get("/getProducts",getProductList);
 router.get("/getProduct/:id",getProductById);
 router.get("/getProductList/:category",getProductsByCategory);
