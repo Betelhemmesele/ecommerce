@@ -30,8 +30,8 @@ const ProductSlice = createSlice({
     })
     .addCase(createProduct.fulfilled, (state,  { payload }) => {
       state.loading = false;
-      state.product = payload.data;
-      // state.userProducts = [...payload];
+      state.product = payload;
+      state.userProducts = payload;
     })
     .addCase(createProduct.rejected, (state,  { payload }) => {
       state.loading = false;
@@ -42,7 +42,7 @@ const ProductSlice = createSlice({
     })
     .addCase(getProductByID.fulfilled, (state,  { payload }) => {
       state.loading = false;
-      state.userProducts = payload;
+      state.product = payload;
     })
     .addCase(getProductByID.rejected, (state,  { payload }) => {
       state.loading = false;
@@ -57,14 +57,14 @@ const ProductSlice = createSlice({
     })
     .addCase(getProductsByUser.rejected, (state,  { payload }) => {
       state.loading = false;
-      state.error = payload.message;
+      state.error = payload;
     })
     .addCase(getProducts.pending, (state) => {
       state.loading = true;
     })
-    .addCase(getProducts.fulfilled, (state,  { payload }) => {
+    .addCase(getProducts.fulfilled, (state, { payload}) => {
       state.loading = false;
-      state.userProducts = payload;
+      state.products = payload;
     })
     .addCase(getProducts.rejected, (state,  { payload }) => {
       state.loading = false;

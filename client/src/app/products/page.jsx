@@ -1,9 +1,19 @@
 
 "use client";
 import { openEditModal } from '@/actions/modals.actions';
+import { getProductsByUser } from '@/actions/product.actions';
 import AddProductEdit from '@/components/AddProductEdit';
 import ProductCard from '@/components/ProductCard';
+import { createSelector } from '@reduxjs/toolkit';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
+const productSelector = (state) => state.product;
+const loadingSelector = createSelector(productSelector, (product) => product.loading);
+const productsSelector = createSelector(productSelector, (product) => product.userProducts);
+
+const authSelector = (state) => state.auth;
+const userInfoSelector = createSelector(authSelector, (auth) => auth.userInfo);
 
 export default function Products() {
 
@@ -11,6 +21,15 @@ export default function Products() {
 
   const {isOpen} = useSelector((state)=>({...state.modal}))
 
+  const loading = useSelector(loadingSelector);
+  const userProducts = useSelector(productsSelector);
+
+  const userInfo = useSelector(userInfoSelector);
+
+  useEffect(() => {
+    dispatch(getProductsByUser(userInfo.id));
+    console.log('products',userProducts)
+}, []);
 
   return (
     <div className="bg-white">
@@ -29,10 +48,9 @@ export default function Products() {
         </dialog>
         <h2 className="sr-only">Products</h2>
         <div className="grid grid-cols-3 gap-[80px]">
-          {/* {products.map((product) => ( */}
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
+        {typeof userProducts === 'object' && userProducts !== null? Object.values(userProducts).map((product)=> (
+          <ProductCard key={product.id} product={product}/>
+)):null}
         </div>
       </div>
     </div>

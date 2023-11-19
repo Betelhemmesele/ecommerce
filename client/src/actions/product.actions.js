@@ -13,7 +13,7 @@ export const createProduct = createAsyncThunk(
     try {
       const response = await axios.post("http://localhost:3009/backend/users/createProducts", {title, category, description, image, tags, price, userId});
       toast.success("Added Successfully");
-      return {response}
+      return response.data
     } catch (err) {
       console.log(title)
       return rejectWithValue(err.response.data);
@@ -26,7 +26,7 @@ export const getProductByID = createAsyncThunk(
   async (productId, { rejectWithValue }) => {
     try {
       const response = await API.get(`/backend/users/products/${productId}`);;
-      return response.data;
+      return {response}
     } catch (err) {
       return rejectWithValue(err.response.data);
     }
@@ -36,24 +36,27 @@ export const getProductByID = createAsyncThunk(
 
 export const getProducts = createAsyncThunk(
   "product/getProducts",
-  async ({ rejectWithValue }) => {
-    try {
-      const response = await API.get(`/backend/users/products`);;
-      return response.data;
-    } catch (err) {
-      return rejectWithValue(err.response.data);
-    }
+  async () => {
+  try {
+    const response = await axios.get(
+      "http://localhost:3009/backend/users/getProducts"
+    );
+    return response.data.products;
+  } catch (error) {
+    console.error(error);
   }
+}
 );
+
 
 export const getProductsByUser = createAsyncThunk(
   "product/getProductsByUser",
-  async (userId, { rejectWithValue }) => {
+  async (userId) => {
     try {
-      const response = await API.get(`/backend/users/products/userproducts/${userId}`);;
-      return response.data;
+      const response = await axios.get(`http://localhost:3009/backend/users/seller/${userId}/products`,);
+      return response.data.products;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      console.error(err);
     }
   }
 );
@@ -64,7 +67,7 @@ export const updateProduct = createAsyncThunk(
     try {
       const response = await API.patch(`/backend/users/products/${id}`, updatedProductData);
       toast.success("Product Updated Successfully");
-      return response.data;
+      return {response}
     } catch (err) {
       return rejectWithValue(err.response.data);
     }
@@ -75,9 +78,9 @@ export const deleteProduct = createAsyncThunk(
   "product/deleteProduct",
   async ({ id, toast }, { rejectWithValue }) => {
     try {
-      const response = await API.delete(`/backend/users/deleteProduct/${id}`);
+      const response = await axios.delete(`http://localhost:3009/backend/users/deleteProduct/${id}`);
       toast.success("Product Deleted Successfully");
-      return response.data;
+      return {response}
     } catch (err) {
       return rejectWithValue(err.response.data);
     }

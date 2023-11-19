@@ -50,7 +50,7 @@ exports.productList = async (req, res) => {
     try {
       const sellerId = req.params.sellerId;
   
-      const products = await Product.findAll({
+      const products = await Product.Products.findAll({
         where: {
           userId: sellerId,
         },
