@@ -4,6 +4,7 @@ import { openEditModal } from '@/actions/modals.actions';
 import { getProductsByUser } from '@/actions/product.actions';
 import AddProductEdit from '@/components/AddProductEdit';
 import ProductCard from '@/components/ProductCard';
+import { startPolling } from '@/reduxSlices/ProductSlice';
 import { createSelector } from '@reduxjs/toolkit';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,7 +30,7 @@ export default function Products() {
   useEffect(() => {
     dispatch(getProductsByUser(userInfo.id));
     console.log('products',userProducts)
-}, []);
+}, [userProducts]);
 
   return (
     <div className="bg-white">

@@ -3,6 +3,7 @@
 
 import { createProduct, getProductByID, getProductsByUser, updateProduct, deleteProduct, getProducts } from '@/actions/product.actions'
 import { createSlice } from '@reduxjs/toolkit'
+import { useSelector } from 'react-redux';
 
 
 
@@ -110,6 +111,7 @@ const ProductSlice = createSlice({
     })
 },
 });
+
 
 export const { setCurrentPage } = ProductSlice.actions;
 

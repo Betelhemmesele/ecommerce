@@ -39,11 +39,11 @@ const AddProductEdit = () => {
     }));
   };
 
-  function handleKeyDown(e) {
+  function AddTag() {
     // If user did not press enter key, return
-    if (e.key !== "Insert") return;
+    // if (e.key !== "Insert") return;
     // Get the value of the input
-    const value = e.target.value;
+    const value = document.getElementById('tag').value;
     // If the value is empty, return
     if (!value.trim()) return;
     // Add the value to the tags array
@@ -53,8 +53,10 @@ const AddProductEdit = () => {
       tags: [...productData.tags, value],
     });
     // Clear the input
-    e.target.value = "";
+    document.getElementById('tag').value = "";
   }
+
+ 
 
   function removeTag(deleteTag) {
     // setTaglist(tags.filter((el, i) => i !== index))
@@ -168,6 +170,7 @@ const AddProductEdit = () => {
                       <p className="text-red text-xs hidden">
                         Please fill out this field.
                       </p>
+                     
                     </div>
                     <div className="mb-3 space-y-2 w-full text-xs">
                       <label className="font-semibold text-gray-600 py-2">
@@ -191,6 +194,7 @@ const AddProductEdit = () => {
                   <div className="md:flex md:flex-row md:space-x-4 w-full text-xs">
                     <div className="w-full flex flex-col mb-3">
                       <div className="border-2 border-black p-2 rounded-md w-min[80vw, 600px] mt-4 flex items-center flex-wrap gap-2">
+                        <div onScroll="smooth">
                         {tags &&
                           tags.map((tag, index) => (
                             <div
@@ -206,12 +210,16 @@ const AddProductEdit = () => {
                               </span>
                             </div>
                           ))}
+                          </div>
+                          <div className="flex gap-2">  
                         <input
                           type="text"
                           className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded-lg h-10 px-4"
                           placeholder="Type & press insert "
-                          onKeyDown={handleKeyDown}
+                          id="tag"
                         />
+                         <button onClick={()=>{AddTag()}}>+</button>
+                         </div>
                       </div>
                     </div>
                     <div className="w-full flex flex-col mb-3">

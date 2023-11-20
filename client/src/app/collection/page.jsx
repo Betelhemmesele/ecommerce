@@ -25,7 +25,7 @@ const page = () => {
   useEffect(() => {
     dispatch(getProducts());
     console.log( 'product',products)
-}, []);
+}, [products]);
 
 // let products = dispatch(getProducts());
 
