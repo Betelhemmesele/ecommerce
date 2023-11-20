@@ -40,14 +40,11 @@ const AddProductEdit = () => {
   };
 
   function AddTag() {
-    // If user did not press enter key, return
-    // if (e.key !== "Insert") return;
     // Get the value of the input
     const value = document.getElementById('tag').value;
     // If the value is empty, return
     if (!value.trim()) return;
     // Add the value to the tags array
-    // setTaglist([...taglist, value])
     setProductData({
       ...productData,
       tags: [...productData.tags, value],
