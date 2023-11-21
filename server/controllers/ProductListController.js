@@ -2,17 +2,18 @@ const DataTypes = require("sequelize");
 const { sequelize } = require("../models/index");
 const Product = require('../models/User')(sequelize, DataTypes);
 const { Op } = require('sequelize');
+
 exports.productList = async (req, res) => {
   try {
-    const { title, description, price, category, images, tags, userId } = req.body;
-
+    const { title, description, price, category, tags, userId } = req.body;
+    const image = req.file; 
     // Create a new product listing with the provided userId
     const product = await Product.Products.create({
       title,
       description,
       price,
       category,
-      images,
+      images:image.buffer,
       userId, // Add the userId to the product creation
     });
 

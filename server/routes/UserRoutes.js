@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const upload = require('../controllers/uploads.js');
 const {
   registerUser,
   confirmEmail,
@@ -34,7 +35,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset_password/:id/:token", resetPassword);
 
 router.get("/alluser",getAllUsers)
-router.post("/createProducts",productList);
+router.post("/createProducts",upload.single('image'),productList);
 router.get("/getProducts",getProductList);
 router.get("/getProduct/:id",getProductById);
 router.get("/getProductList/:category",getProductsByCategory);
