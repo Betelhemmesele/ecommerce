@@ -29,7 +29,6 @@ export default function Products() {
 
   useEffect(() => {
     dispatch(getProductsByUser(userInfo.id));
-    console.log('products',userProducts)
 }, [userProducts]);
 
   return (

@@ -2,33 +2,104 @@
 import { closeEditModal } from "@/actions/modals.actions";
 import { createProduct, updateProduct } from "@/actions/product.actions";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "reselect";
-
+import {getDownloadURL, getStorage,ref, uploadBytesResumable} from 'firebase/storage';   
+import { app } from "@/firebase";
 const initialState = {
   title: "",
   description: "",
   price: "",
   category: "",
   tags: "",
-  image: null,
+  image: " ",
   userId: "",
 };
 
 const authSelector = (state) => state.auth;
 const userInfoSelector = createSelector(authSelector, (auth) => auth.userInfo);
 
-const AddProductEdit = () => {
+const productSelector = (state) => state.product;
+const productsSelector = createSelector(productSelector, (product) => product.userProducts);
+
+const AddProductEdit = ({id}) => {
   const dispatch = useDispatch();
-  const { id } = useParams();
+  // const { id } = useParams();
   const [productData, setProductData] = useState(initialState);
-  // const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [files,setFiles]=useState('');         
+  const [imageUploadError,setImageUploadError] =useState(null);
+  const [uploading,setUploading]=useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  // console.log(error);
+  // console.log(imageUploadError);
+  // console.log("from data",formData)
+  // console.log(files);
 
   const userInfo = useSelector(userInfoSelector);
+  const userProducts = useSelector(productsSelector);
 
   const { title, description, price, category, tags } = productData;
+
+  useEffect(() => {
+    if (id) {
+      const singleProduct = userProducts.find((product) => product._id === id);
+      console.log('current product', singleProduct);
+      setProductData({singleProduct });
+    }
+    console.log('product id now', id)
+  }, [id]);
+ 
+
+  const handleImageSubmit=()=>{
+    setUploading(true);
+    setImageUploadError(false);
+    if (files.length === 1 && productData.image.length < 6) {
+      storeImage(files[0])
+        .then((url) => {
+          setProductData({
+            ...productData,
+            image: url,
+          });
+          setImageUploadError(false);
+          setUploading(false); 
+        })
+        .catch((err) => {
+          setImageUploadError("Image upload failed (2MB max allowed)");
+          setUploading(false);
+          console.log(err);
+        });
+    } else {
+      setImageUploadError("You can only upload one image per list");
+      setUploading(false);
+    }
+  };
+
+  const storeImage = async (file) => {
+    return new Promise((resolve, reject) => {
+      const storage = getStorage(app);
+      const fileName = new Date().getTime() + file.name;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload is${progress}% done`);
+        },
+        (error) => {
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            resolve(downloadURL);
+          });
+        }
+      );
+    });
+  };  
 
   const onInputChange = (e) => {
     const { name, value } = e.target;
@@ -81,24 +152,35 @@ const AddProductEdit = () => {
   //   setProductData({ ...productData, images: formData });
   // }
 
-  const onImageChange = (event) => {
-    setSelectedFiles(Array.from(event.target.files));
-    setProductData({ ...productData, image: selectedFiles });
-  };
+  // const onImageChange = (event) => {
+  //   setSelectedFiles(Array.from(event.target.files));
+  //   setProductData({ ...productData, image: selectedFiles });
+  // };
+
+  // const renderPreviewImages = () => {
+  //   return selectedFiles.map((file, index) => (
+  //     <img
+  //       key={index}
+  //       src={URL.createObjectURL(file)}
+  //       alt="Preview"
+  //       style={{ width: "30%" }}
+  //     />
+  //   ));
+  // };
 
   const renderPreviewImages = () => {
-    return selectedFiles.map((file, index) => (
+    return files[0] && (
       <img
-        key={index}
-        src={URL.createObjectURL(file)}
+        src={URL.createObjectURL(files[0])}
         alt="Preview"
         style={{ width: "30%" }}
       />
-    ));
+    );
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    handleImageSubmit();
     console.log(productData);
     if (id) {
       dispatch(updateProduct({ id, productData }));
@@ -143,11 +225,13 @@ const AddProductEdit = () => {
                           type="file"
                           className="hidden"
                           multiple="multiple"
-                          // accept="image/*"
-                          onChange={onImageChange}
+                          accept="image/*"
+                          onChange={(e=>setFiles(e.target.files))}
                         />
                       </label>
                     </div>
+                   {/* <button onClick={handleImageSubmit}>{uploading? 'uploading...':'Upload'}</button>*/}
+                    <p className="text-red-700 text-sm">{imageUploadError}</p>
                   </div>
                   <div className="md:flex flex-row md:space-x-4 w-full text-xs">
                     <div className="mb-3 space-y-2 w-full text-xs">

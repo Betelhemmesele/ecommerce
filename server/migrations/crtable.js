@@ -326,62 +326,62 @@ module.exports = {
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
     });
-    await queryInterface.addConstraint('product_tags', {
-      fields: ['productId'],
-      type: 'foreign key',
-      name: 'product_tags_productId_fkey',
-      references: {
-        table: 'products',
-        field: 'id',
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
+    // await queryInterface.addConstraint('product_tags', {
+    //   fields: ['productId'],
+    //   type: 'foreign key',
+    //   name: 'product_tags_productId_fkey',
+    //   references: {
+    //     table: 'products',
+    //     field: 'id',
+    //   },
+    //   onDelete: 'CASCADE',
+    //   onUpdate: 'CASCADE',
+    // });
 
-    await queryInterface.addConstraint('product_tags', {
-      fields: ['tagId'],
-      type: 'foreign key',
-      name: 'product_tags_tagId_fkey',
-      references: {
-        table: 'tags',
-        field: 'id',
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
-    await queryInterface.addConstraint('product_reviews', {
-      fields: ['productId'],
-      type: 'foreign key',
-      name: 'fk_product_reviews_productId',
-      references: {
-        table: 'products',
-        field: 'id',
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
-    await queryInterface.addConstraint('carts', {
-      fields: ['userId'],
-      type: 'foreign key',
-      name: 'fk_carts_userId',
-      references: {
-        table: 'users',
-        field: 'id',
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
-    await queryInterface.addConstraint('cart_items', {
-      fields: ['productId'],
-      type: 'foreign key',
-      name: 'fk_cart_items_productId',
-      references: {
-        table: 'products',
-        field: 'id',
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
+    // await queryInterface.addConstraint('product_tags', {
+    //   fields: ['tagId'],
+    //   type: 'foreign key',
+    //   name: 'product_tags_tagId_fkey',
+    //   references: {
+    //     table: 'tags',
+    //     field: 'id',
+    //   },
+    //   onDelete: 'CASCADE',
+    //   onUpdate: 'CASCADE',
+    // });
+    // await queryInterface.addConstraint('product_reviews', {
+    //   fields: ['productId'],
+    //   type: 'foreign key',
+    //   name: 'fk_product_reviews_productId',
+    //   references: {
+    //     table: 'products',
+    //     field: 'id',
+    //   },
+    //   onDelete: 'CASCADE',
+    //   onUpdate: 'CASCADE',
+    // });
+    // await queryInterface.addConstraint('carts', {
+    //   fields: ['userId'],
+    //   type: 'foreign key',
+    //   name: 'fk_carts_userId',
+    //   references: {
+    //     table: 'users',
+    //     field: 'id',
+    //   },
+    //   onDelete: 'CASCADE',
+    //   onUpdate: 'CASCADE',
+    // });
+    // await queryInterface.addConstraint('cart_items', {
+    //   fields: ['productId'],
+    //   type: 'foreign key',
+    //   name: 'fk_cart_items_productId',
+    //   references: {
+    //     table: 'products',
+    //     field: 'id',
+    //   },
+    //   onDelete: 'CASCADE',
+    //   onUpdate: 'CASCADE',
+    // });
 
     await queryInterface.addConstraint('cart_items', {
       fields: ['cartId'],
