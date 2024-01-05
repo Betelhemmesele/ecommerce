@@ -9,9 +9,9 @@ const API = axios.create({baseURL: 'http://localhost:3009/'});
 
 export const createProduct = createAsyncThunk(
   "product/createProduct",
-  async ({title, category, description, image, tags, price, userId}, { rejectWithValue }) => {
+  async ({title, category, description, imageUrl, tags, price, userId}, { rejectWithValue }) => {
     try {
-      const response = await axios.post("http://localhost:3009/backend/users/createProducts", {title, category, description, image, tags, price, userId});
+      const response = await axios.post("http://localhost:3009/backend/users/createProducts", {title, category, description, imageUrl, tags, price, userId});
       toast.success("Added Successfully");
       return response.data
     } catch (err) {

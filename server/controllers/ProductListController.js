@@ -4,7 +4,7 @@ const Product = require('../models/User')(sequelize, DataTypes);
 const { Op } = require('sequelize');
 exports.productList = async (req, res) => {
   try {
-    const { title, description, price, category, tags, images, userId } = req.body;
+    const { title, description, price, category, tags, imageUrl, userId } = req.body;
 
     // Create a new product listing with the provided userId
     const product = await Product.Products.create({
@@ -12,7 +12,7 @@ exports.productList = async (req, res) => {
       description,
       price,
       category,
-      images,
+      imageUrl,
       userId, // Add the userId to the product creation
     })
 

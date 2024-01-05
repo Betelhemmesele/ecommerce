@@ -1,19 +1,24 @@
 "use client";
 import { closeEditModal } from "@/actions/modals.actions";
 import { createProduct, updateProduct } from "@/actions/product.actions";
-import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "reselect";
-import {getDownloadURL, getStorage,ref, uploadBytesResumable} from 'firebase/storage';   
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 import { app } from "@/firebase";
+
 const initialState = {
   title: "",
   description: "",
   price: "",
   category: "",
   tags: "",
-  image: " ",
+  imageUrl: "",
   userId: "",
 };
 
@@ -21,59 +26,65 @@ const authSelector = (state) => state.auth;
 const userInfoSelector = createSelector(authSelector, (auth) => auth.userInfo);
 
 const productSelector = (state) => state.product;
-const productsSelector = createSelector(productSelector, (product) => product.userProducts);
+const productsSelector = createSelector(
+  productSelector,
+  (product) => product.userProducts
+);
 
-const AddProductEdit = ({id}) => {
+const AddProductEdit = ({ id }) => {
   const dispatch = useDispatch();
-  // const { id } = useParams();
   const [productData, setProductData] = useState(initialState);
-  const [files,setFiles]=useState('');         
-  const [imageUploadError,setImageUploadError] =useState(null);
-  const [uploading,setUploading]=useState(false);
+  const [files, setFiles] = useState("");
+  const [imageUploadError, setImageUploadError] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  // console.log(error);
-  // console.log(imageUploadError);
-  // console.log("from data",formData)
-  // console.log(files);
 
   const userInfo = useSelector(userInfoSelector);
-  const userProducts = useSelector(productsSelector);
+  // const userProducts = useSelector(productsSelector);
 
-  const { title, description, price, category, tags } = productData;
+  const { title, description, price, category, tags, imageUrl } = productData;
 
-  useEffect(() => {
-    if (id) {
-      const singleProduct = userProducts.find((product) => product._id === id);
-      console.log('current product', singleProduct);
-      setProductData({singleProduct });
-    }
-    console.log('product id now', id)
-  }, [id]);
- 
-
-  const handleImageSubmit=()=>{
-    setUploading(true);
-    setImageUploadError(false);
-    if (files.length === 1 && productData.image.length < 6) {
-      storeImage(files[0])
-        .then((url) => {
-          setProductData({
-            ...productData,
-            image: url,
-          });
-          setImageUploadError(false);
-          setUploading(false); 
-        })
-        .catch((err) => {
-          setImageUploadError("Image upload failed (2MB max allowed)");
-          setUploading(false);
-          console.log(err);
-        });
+  const handleImageSubmit = async () => {
+    if (files.length === 1 && productData.imageUrl.length < 6) {
+      try {
+        const url = await storeImage(files[0]);
+        await updateProductData(url);
+        setImageUploadError(false);
+        setUploading(false);
+      } catch (err) {
+        handleImageUploadError(err);
+        setUploading(false);
+        return null;
+      }
     } else {
-      setImageUploadError("You can only upload one image per list");
+      handleInvalidImageUpload();
       setUploading(false);
     }
+  };
+
+  var updatedProductData = {};  
+
+  const updateProductData = async (url) => {
+    updatedProductData = {
+      ...productData,
+      imageUrl: url,
+    };
+    setProductData({
+      ...productData,
+      imageUrl: url,
+    });
+    console.log('product', productData);
+    console.log('updated', updatedProductData);
+  };
+
+  const handleImageUploadError = (error) => {
+    setImageUploadError("Image upload failed (2mb max allowed)");
+    console.log(error);
+  };
+
+  const handleInvalidImageUpload = () => {
+    setImageUploadError("You can only upload one image per list");
   };
 
   const storeImage = async (file) => {
@@ -83,7 +94,7 @@ const AddProductEdit = ({id}) => {
       const storageRef = ref(storage, fileName);
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on(
-        'state_changed',
+        "state_changed",
         (snapshot) => {
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -99,7 +110,7 @@ const AddProductEdit = ({id}) => {
         }
       );
     });
-  };  
+  };
 
   const onInputChange = (e) => {
     const { name, value } = e.target;
@@ -112,7 +123,7 @@ const AddProductEdit = ({id}) => {
 
   function AddTag() {
     // Get the value of the input
-    const value = document.getElementById('tag').value;
+    const value = document.getElementById("tag").value;
     // If the value is empty, return
     if (!value.trim()) return;
     // Add the value to the tags array
@@ -121,82 +132,83 @@ const AddProductEdit = ({id}) => {
       tags: [...productData.tags, value],
     });
     // Clear the input
-    document.getElementById('tag').value = "";
+    document.getElementById("tag").value = "";
   }
 
- 
-
   function removeTag(deleteTag) {
-    // setTaglist(tags.filter((el, i) => i !== index))
     setProductData({
       ...productData,
       tags: productData.tags.filter((el, tag) => tag !== deleteTag),
     });
   }
 
-  // const onImageChange = (event) => {
-  //   console.log(event.target.files[0]);
-  //    setSelectedFile(event.target.files[0]);
-  //   const reader = new FileReader();
-  //   reader.readAsArrayBuffer(selectedFile);
-  //   reader.onload = () => {
-  //     const blob = new Blob([reader.result], { type: selectedFile.type });
-  //     uploadImage(blob);
-  //   }
-  // };
-
-  // const uploadImage = (blob) => {
-  //   const formData = new FormData();
-  //   formData.append('image', blob, selectedFile.name);
-
-  //   setProductData({ ...productData, images: formData });
-  // }
-
-  // const onImageChange = (event) => {
-  //   setSelectedFiles(Array.from(event.target.files));
-  //   setProductData({ ...productData, image: selectedFiles });
-  // };
-
-  // const renderPreviewImages = () => {
-  //   return selectedFiles.map((file, index) => (
-  //     <img
-  //       key={index}
-  //       src={URL.createObjectURL(file)}
-  //       alt="Preview"
-  //       style={{ width: "30%" }}
-  //     />
-  //   ));
-  // };
-
   const renderPreviewImages = () => {
-    return files[0] && (
-      <img
-        src={URL.createObjectURL(files[0])}
-        alt="Preview"
-        style={{ width: "30%" }}
-      />
+    return (
+      files[0] && (
+        <img
+          src={URL.createObjectURL(files[0])}
+          alt="Preview"
+          style={{ width: "30%" }}
+        />
+      )
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleImageSubmit();
-    console.log(productData);
-    if (id) {
-      dispatch(updateProduct({ id, productData }));
-    } else {
-      dispatch(createProduct(productData));
+
+    try {
+      await handleImageSubmit();
+
+      if (id) {
+        dispatch(updateProduct({ id, productData }));
+      } else {
+        dispatch(createProduct(updatedProductData));
+      }
+      setProductData(initialState);
+    } catch (err) {
+      // Handle any error that occurred during image upload or dispatch
+      console.log(err);
     }
-    setProductData({});
   };
 
+  //   const handleSubmit = async(e) => {
+  //     e.preventDefault();
+  //     try {
+  //       if(formData.imageUrls.length < 1){
+  //         return setError('you must upload at least one image');
+  //       }
+  //       if(+formData.regularPrice < +formData.discountedPrice)
+  //         return setError('you must insert discounted price lower than regular price');
+  //       setLoading(true);
+  //       setError(false);
+  //       const res=await fetch ('/api/listing/create',{
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+
+  //         },
+  //         body: JSON.stringify({
+  //           ...formData,
+  //           userRef: currentUser.currentUser._id,
+  //          }),
+  //       })
+  //       console.log("user id",currentUser.currentUser._id);
+  //       const data =await res.json();
+  //       setLoading(false);
+  //       if(data.success === false){
+  //         setError(data.message);
+  //       }
+  //       navigate('/listing/${data._id');
+  //     } catch (error) {
+  //       setError(error.message);
+  //       setLoading(false);
+
+  //     }
+  // }
+
   return (
-    <form
-      // action="/upload"
-      // method="POST"
-      // enctype="multipart/form-data"
-      onSubmit={handleSubmit}
-    >
+    <form onSubmit={handleSubmit}>
       <div className="relative  flex  justify-center bg-center bg-gray-50 py-[25px] px-4 sm:px-6 lg:px-8  bg-no-repeat bg-cover  items-center">
         <div className="absolute bg-black opacity-60 inset-0 z-0"></div>
         <div className="max-w-md w-full  p-10 bg-white rounded-xl shadow-lg z-10">
@@ -226,11 +238,12 @@ const AddProductEdit = ({id}) => {
                           className="hidden"
                           multiple="multiple"
                           accept="image/*"
-                          onChange={(e=>setFiles(e.target.files))}
+                          value={imageUrl || ""}
+                          onChange={(e) => setFiles(e.target.files)}
                         />
                       </label>
                     </div>
-                   {/* <button onClick={handleImageSubmit}>{uploading? 'uploading...':'Upload'}</button>*/}
+                    {/* <button onClick={handleImageSubmit}>{uploading? 'uploading...':'Upload'}</button>*/}
                     <p className="text-red-700 text-sm">{imageUploadError}</p>
                   </div>
                   <div className="md:flex flex-row md:space-x-4 w-full text-xs">
@@ -251,7 +264,6 @@ const AddProductEdit = ({id}) => {
                       <p className="text-red text-xs hidden">
                         Please fill out this field.
                       </p>
-                     
                     </div>
                     <div className="mb-3 space-y-2 w-full text-xs">
                       <label className="font-semibold text-gray-600 py-2">
@@ -276,31 +288,37 @@ const AddProductEdit = ({id}) => {
                     <div className="w-full flex flex-col mb-3">
                       <div className="border-2 border-black p-2 rounded-md w-min[80vw, 600px] mt-4 flex items-center flex-wrap gap-2">
                         <div onScroll="smooth">
-                        {tags &&
-                          tags.map((tag, index) => (
-                            <div
-                              className="bg-gray-300 inline-block px-2 py-1 rounded-full"
-                              key={index}
-                            >
-                              <span className="text">{tag}</span>
-                              <span
-                                className="close flex items-center justify-center h-5 w-5 bg-gray-800 text-white rounded-full ml-2 text-base cursor-pointer"
-                                onClick={() => removeTag(index)}
+                          {tags &&
+                            tags.map((tag, index) => (
+                              <div
+                                className="bg-gray-300 inline-block px-2 py-1 rounded-full"
+                                key={index}
                               >
-                                &times;
-                              </span>
-                            </div>
-                          ))}
-                          </div>
-                          <div className="flex gap-2">  
-                        <input
-                          type="text"
-                          className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded-lg h-10 px-4"
-                          placeholder="Type & press insert "
-                          id="tag"
-                        />
-                         <button onClick={()=>{AddTag()}}>+</button>
-                         </div>
+                                <span className="text">{tag}</span>
+                                <span
+                                  className="close flex items-center justify-center h-5 w-5 bg-gray-800 text-white rounded-full ml-2 text-base cursor-pointer"
+                                  onClick={() => removeTag(index)}
+                                >
+                                  &times;
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded-lg h-10 px-4"
+                            placeholder="Type & press insert "
+                            id="tag"
+                          />
+                          <button
+                            onClick={() => {
+                              AddTag();
+                            }}
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div className="w-full flex flex-col mb-3">
